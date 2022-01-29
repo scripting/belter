@@ -273,7 +273,7 @@ function startup () {
 	$("#idCompileButton").click (function () {
 		var scriptText = getScriptText ();
 		parseScriptText (scriptText, function (err, code) {
-			hackCodeTree (code, function () { 
+			hackCodeTree (code, function (err, code) { 
 				var theOutline = codeTreeToOutline (code);
 				var opmltext = opml.stringify (theOutline);
 				setCodeOutlne (opmltext);
@@ -297,8 +297,4 @@ function startup () {
 				}
 			});
 		});
-	
-	
-	
-	
 	}
