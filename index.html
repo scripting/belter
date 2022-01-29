@@ -1,0 +1,105 @@
+<html>
+	<head>
+		<title>Belter</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+		
+		<script src="//s3.amazonaws.com/scripting.com/code/includes/jquery-1.9.1.min.js"></script>
+<link href="//s3.amazonaws.com/scripting.com/code/includes/bootstrap.css" rel="stylesheet">
+<script src="//s3.amazonaws.com/scripting.com/code/includes/bootstrap.min.js"></script>
+
+<link rel="stylesheet" href="//s3.amazonaws.com/scripting.com/code/fontawesome/css/all.css">
+<link href="//fonts.googleapis.com/css?family=Ubuntu:400,500i,700" rel="stylesheet">
+<link href="//fonts.googleapis.com/css?family=Rancho" rel="stylesheet">
+
+<script src="//s3.amazonaws.com/scripting.com/code/includes/basic/code.js"></script>
+<link href="//s3.amazonaws.com/scripting.com/code/includes/basic/styles.css" rel="stylesheet" type="text/css">
+
+		
+		<script src="http://fargo.io/code/storage/api.js"></script>
+		
+		<script src="http://scripting.com/code/concord/testing/3.0.6/concord.js"></script>
+		<link rel="stylesheet" href="http://scripting.com/code/concord/testing/3.0.6/concordstyles.css"/>
+		<script src="http://fargo.io/code/shared/outliner.js"></script>
+		<script src="http://fargo.io/code/shared/xml.js"></script>
+		<script src="http://fargo.io/code/keypress.js" /></script>
+		
+		<script src="//scripting.com/code/outlinebrowser/code.js"></script>
+		<link href="//scripting.com/code/outlinebrowser/styles.css" rel="stylesheet" type="text/css">
+		
+		<script src="http://scripting.com/code/opmlpackage/client/opml.js"></script>
+		
+		
+		<script src="//scripting.com/code/motd/code.js"></script>
+		<link href="//scripting.com/code/motd/styles.css" rel="stylesheet" type="text/css">
+		
+		<script src="http://scripting.com/publicfolder/code/jsParserForLO2/acorn.js"></script>
+		<script src="http://scripting.com/publicfolder/code/jsParserForLO2/escodegen.browser.js"></script>
+		
+		<script src="//scripting.com/code/testing/belter/code.js"></script>
+		<link href="//scripting.com/code/testing/belter/styles.css" rel="stylesheet" type="text/css">
+		
+		</head>
+	<body>
+		<div class="divMenubar" id="idMenubar">
+			<div class="topbar-wrapper" style="z-index: 5;">
+				<div class="navbar navbar-fixed-top" data-dropdown="dropdown">
+					<div class="divVersionNumber" id="idVersionNumber">
+						0.4.2
+						</div>
+					<div class="navbar-inner">
+						<div class="container">
+							<a class="brand" onclick="clickHome ()"><span id="idMenuProductName">Belter</span></a>
+							<ul class="nav" id="idMainMenuList">
+								<li class="dropdown" id="idMainMenu"> 
+									<a href="#" class="dropdown-toggle" data-toggle="dropdown">Menu&nbsp;<b class="caret"></b></a>
+									<ul class="dropdown-menu">
+										</ul>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		<div class="divPageBody">
+			
+			<div class="divAttsDisplay" id="idAttsDisplay">
+				</div>
+			<div class="divButtons">
+				<button class="btn btn-large" type="button" id="idCompileButton">Compile</button>
+				<button class="btn btn-large" type="button" id="idRunButton">Run</button>
+				</div>
+			
+			<div class="divEditors">
+				<table class="tableEditors">
+					<tr>
+						<td class="tdEditor">
+							<div class="divCodeEditor">
+								<div id="outliner">
+									</div>
+								</div>
+							</td>
+						<td class="tdSpacer">
+							&nbsp;
+							</td>
+						<td class="tdEditor">
+							<div class="divCodeTree">
+								<div id="idCodeTreeOutline">
+									</div>
+								</div>
+							</td>
+						</tr>
+					</table>
+				
+				
+				</div>
+		<script>
+			$(document).ready (function () {
+				
+				startup ();
+				});
+			</script>
+		</body>
+	</html>
