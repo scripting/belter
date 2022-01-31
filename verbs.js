@@ -47,6 +47,15 @@ function servercall (path, params, flAuthenticated, callback, urlServer=appConst
 		});
 	}
 
+var test = {
+	
+	errorFunc: function () {
+		alert (undefinedvariable);
+		}
+	
+	
+	
+	}
 var http = {
 	readUrl: function (url, flUseProxyServer) {
 		if (flUseProxyServer === undefined) {

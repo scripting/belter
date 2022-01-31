@@ -2,7 +2,68 @@ var appPrefs = {
 	outlineFont: "Ubuntu",
 	outlineFontSize: 16,
 	outlineLineHeight: 24,
+	flGenerateCurlyBraces: true,
+	flGenerateSemicolons: true,
 	}
+
+
+function getBarcursorSummit () {
+	var barcursor = opGetBarCursor (), theSummit;
+	barcursor.visitToSummit (function (theNode) {
+		theSummit = theNode;
+		return (true);
+		});
+	return (theSummit);
+	}
+function getScriptTextFromSuboutline () { //v2 -- 1/31/22 by DW
+	let theText = "", indentlevel = 0;
+	var theSubOutline = opSubOutlineJstruct (getBarcursorSummit ());
+	function addlevel (theNode) {
+		function add (s) {
+			theText += filledString ("\t", indentlevel) + s + "\n"
+			}
+		function openCurly (sub) {
+			if (appPrefs.flGenerateCurlyBraces) {
+				if (sub.subs !== undefined) {
+					return (" {");
+					}
+				}
+			return ("");
+			}
+		function addCloseCurly (sub) {
+			if (appPrefs.flGenerateCurlyBraces) {
+				if (sub.subs !== undefined) {
+					add ("}");
+					}
+				}
+			}
+		function getSemi (sub) {
+			if (appPrefs.flGenerateSemicolons) {
+				if (sub.subs === undefined) {
+					return (";");
+					}
+				}
+			return ("");
+			}
+		if (theNode.subs !== undefined) {
+			if (appPrefs.flGenerateCurlyBraces) {
+				}
+			theNode.subs.forEach (function (sub) {
+				if (!getBoolean (sub.isComment)) {
+					add (sub.text + getSemi (sub) + openCurly (sub));
+					indentlevel++;
+					addlevel (sub);
+					addCloseCurly (sub);
+					indentlevel--;
+					}
+				});
+			}
+		}
+	addlevel (theSubOutline);
+	console.log ("getScriptTextFromSuboutline: theText == \n" + theText);
+	return (theText);
+	}
+
 
 function hackCodeTree (code, callback) { //do our magic to a code tree -- 1/29/22 by DW
 	function visitCodeTree (theTree, visit) {
@@ -45,7 +106,7 @@ function parseScriptText (scriptText, callback) {
 	callback (undefined, code);
 	}
 function preprocessScript (scriptText, callback) { //Belter syntax lives here
-	parseScriptText (scriptText, function (theCodeTree) {
+	parseScriptText (scriptText, function (err, theCodeTree) {
 		hackCodeTree (theCodeTree, function (err, newCodeTree) {
 			var newScriptText = escodegen.generate (newCodeTree);
 			newScriptText = "(async function () {" + newScriptText + "}) ()";
@@ -55,74 +116,21 @@ function preprocessScript (scriptText, callback) { //Belter syntax lives here
 	}
 function runScriptText (scriptText, callback) {
 	preprocessScript (scriptText, function (err, newScriptText) {
-		(async function () {
-			var val = eval (newScriptText);
+		
+		async function runScript (theScript) {
+			var val = eval (theScript);
 			return (val);
-			}) ()
+			}
+		
+		runScript (newScriptText)
 			.then (function (response) {
-				callback (undefined, response);
+				callback (undefined, response)
 				})
 			.catch (function (err) {
-				callback (err);
+				callback (err)
 				});
+		
 		});
-	
-	
-	
-	if (callback == null) {
-		callback = function () {};
-		}
-	function visitCodeTree (theTree, visit) {
-		var stack = new Array ();
-		function doVisit (node) { //depth-first traversal
-			for (var x in node) {
-				if (typeof node [x] == "object") {
-					stack.push (node);
-					doVisit (node [x], visit);
-					stack.pop ();
-					}
-				}
-			if (node != null) {
-				visit (node, stack);
-				}
-			}
-		doVisit (theTree);
-		}
-	function fixSpecialFunctionCalls (theTree) {
-		visitCodeTree (theTree, function (node, stack) {
-			if (node.type == "FunctionDeclaration" || node.type == 'FunctionExpression') {
-				node.async = true;
-				}
-			if (node.type == "CallExpression" && node.callee !== undefined) {
-				var nodecopy = Object.assign(new Object (), node);
-				for (var x in node) {
-					delete node [x];
-					}
-				node.type = "AwaitExpression";
-				node.argument = nodecopy;
-				}
-			return (undefined); // don't replace
-			});
-		}
-	function preprocessScript(scriptText) {
-		var scriptBody = '', tokens, i, info;
-		var code = acorn.parse (scriptText, {ecmaVersion: 2020});
-		fixSpecialFunctionCalls (code);
-		scriptBody = escodegen.generate (code);
-		return "(async function () {" + scriptBody + "})()";
-		}
-	(async function () {
-		var processedScriptText = preprocessScript (scriptText);
-		console.log ("runScriptText: processedScriptText == " + processedScriptText);
-		var scriptVal = eval (processedScriptText);
-		return (scriptVal);
-		})()
-		.then(function (response) {
-			callback(null, response);
-			})
-		.catch(function (error) {
-			callback(error);
-			});
 	}
 function codeTreeToOutline (theTree) {
 	var theOutline = {
@@ -179,14 +187,12 @@ function codeTreeToOutline (theTree) {
 			text
 			};
 		copyScalars (node, outlinenode);
-		
 		if (outlinenode.type !== undefined) {
 			delete outlinenode.type;
 			}
-		
 		sublist.push (outlinenode);
 		for (var x in node) {
-			if (typeof node [x] == "object") {
+			if ((typeof node [x] == "object") && (node [x] != null)) {
 				if (outlinenode.subs === undefined) {
 					outlinenode.subs = new Array ();
 					}
@@ -196,18 +202,6 @@ function codeTreeToOutline (theTree) {
 		}
 	doLevel (theTree, "", theOutline.opml.body.subs);
 	return (theOutline);
-	}
-function getScriptText () {
-	var barcursor = opGetBarCursor (), scripttext = "", theSummit;
-	barcursor.visitToSummit (function (theNode) {
-		theSummit = theNode;
-		return (true);
-		});
-	opVisitSubs (theSummit, function (theNode, level) {
-		scripttext += filledString ("\t", level) + theNode.getLineText () + "\n";
-		return (true);
-		});
-	return (scripttext);
 	}
 function viewAttsString () {
 	function getCodeAttsString () {
@@ -271,30 +265,27 @@ function startup () {
 	self.setInterval (everySecond, 1000); 
 	
 	$("#idCompileButton").click (function () {
-		var scriptText = getScriptText ();
+		var scriptText = getScriptTextFromSuboutline ();
 		parseScriptText (scriptText, function (err, code) {
 			hackCodeTree (code, function (err, code) { 
 				var theOutline = codeTreeToOutline (code);
 				var opmltext = opml.stringify (theOutline);
 				setCodeOutlne (opmltext);
-				console.log (jsonStringify (code));
-				console.log (jsonStringify (theOutline));
 				});
 			});
 		$(this).blur ();
 		});
 	$("#idRunButton").click (function () {
-		var scriptText = getScriptText ();
-		console.log (scriptText);
-		$(this).blur ();
-		
+		var scriptText = getScriptTextFromSuboutline ();
 		runScriptText (scriptText, function (err, value) {
 			if (err) {
-				console.log (err.message);
+				console.log ("Error: " + err.message);
 				}
 			else {
 				console.log (value);
 				}
 			});
+		
+		$(this).blur ();
 		});
 	}
