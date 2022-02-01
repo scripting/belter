@@ -16,112 +16,11 @@ body {
 	padding: 19px;
 	}
 
-.divQueryInput {
-	width: 800px;
-	visibility: hidden;
-	margin-left: auto;
-	margin-right: auto;
-	margin-top: 10px;
-	margin-bottom: 0;
-	}
-.divQueryInput input[type="text"] {
-	display: table-cell;
-	font-family: "Ubuntu";
-	font-size: 18px;
-	padding: 5px;
-	width: 15em;
-	height: 2em;
-	vertical-align: middle;
-	margin-bottom: 0;
-	}
-.btnLookup {
-	font-family: "Ubuntu";
-	font-size: 16px;
-	display: table-cell;
-	vertical-align: middle;
-	margin-left: 5px;
-	}
-.divMessage, .divOutlineAtts {
-	font-size: 13px;
-	margin-top: 3px;
-	}
-.divOutlineMetadata {
-	width: 800px;
-	font-size: 16px;
-	height: 1.1em;
-	vertical-align: middle;
-	text-align: right;
-	margin-bottom: 2px;
-	}
-	
-
-.divQueryResults {
-	width: 800px;
-	margin-left: auto;
-	margin-right: auto;
-	}
-
-.divMyIndexContainer {
-	display: table-cell;
-	visibility: hidden;
-	width: 200px !important;
-	vertical-align: top;
-	border: 1px solid silver;
-	}
-.divMyIndex {
-	font-size: 16px;
-	padding: 3px;
-	}
-.divMyIndex ul {
-	list-style-type: none;
-	margin: 0;
-	}
-.liItemInList {
-	cursor: pointer;
-	padding: 2px;
-	padding-left: 5px;
-	white-space: nowrap;
-	}
-
-.divSpacer {
-	display: table-cell;
-	width: 10px !important;
-	}
-
-.divOutlineDisplay {
-	font-size: 16px;
-	width: 100%;
-	padding: 3px;
-	}
-.divRenderedOutline .ulLevel0 {
-	margin-left: 0;
-	margin-top: 15px;
-	}
-.divRenderedOutline .divItemHeader a {
-	font-size: 24px;
-	color: black !important;
-	cursor: pointer;
-	}
-.itemHighlighted {
-	color: white;
-	background-color: #086DD6;
-	}
-
-.focused {
-	border-color: rgba(82, 168, 236, 0.8);
-	outline: 0;
-	outline: thin dotted \9;
-	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
-	background-color: white;
-	}
 
 .iMenuCheck {
 	margin-left: -20px;
 	}
 
-.divMetadataViewer {
-	font-size: 13px;
-	}
 
 
 
@@ -156,6 +55,23 @@ body {
 .divAttsDisplay {
 	float: right;
 	font-size: 14px;
-	margin-top: 23px;
+	margin-top: 28px;
 	margin-left: -5px;
+	}
+
+.divFixedControls {
+	position: fixed;
+	top: 55;
+	width: 80%;
+	margin-left: auto;
+	margin-right: auto;
+	height: 50px;
+	
+	padding-top: 35px;
+	
+	z-index: 2;
+	background-color: whitesmoke;
+	}
+.divEditors { 
+	padding-top: 50px;
 	}
