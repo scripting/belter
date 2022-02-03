@@ -7,7 +7,7 @@ var appPrefs = {
 	flUnicaseNames: false,
 	}
 
-
+var flOutlineChanged = false;
 
 function getBarcursorSummit () {
 	var barcursor = opGetBarCursor (), theSummit;
@@ -62,10 +62,10 @@ function getScriptTextFromSuboutline () { //v2 -- 1/31/22 by DW
 			}
 		}
 	addlevel (theSubOutline);
+	theText = "(function () { " + theText + "}) ()"; //2/3/22 by DW
 	console.log ("getScriptTextFromSuboutline: theText == \n" + theText);
 	return (theText);
 	}
-
 
 function hackCodeTree (code, callback) { //do our magic to a code tree -- 1/29/22 by DW
 	function visitCodeTree (theTree, visit) {
@@ -114,9 +114,16 @@ function parseScriptText (scriptText, callback) {
 	var code = acorn.parse (scriptText, {ecmaVersion: 2020});
 	callback (undefined, code);
 	}
+function viewCodeTree (theTree) {
+	console.log ("viewCodeTree: theTree == \n" + jsonStringify (theTree));
+	var theOutline = codeTreeToOutline (theTree);
+	var opmltext = opml.stringify (theOutline);
+	setCodeOutlne (opmltext);
+	}
 function preprocessScript (scriptText, callback) { //Belter syntax lives here
 	parseScriptText (scriptText, function (err, theCodeTree) {
 		hackCodeTree (theCodeTree, function (err, newCodeTree) {
+			viewCodeTree (newCodeTree); //2/3/22 by DW
 			var newScriptText = escodegen.generate (newCodeTree);
 			newScriptText = "(async function () {" + newScriptText + "}) ()";
 			callback (undefined, newScriptText);
@@ -154,11 +161,16 @@ function codeTreeToOutline (theTree) {
 		};
 	function getCalleeName (node) {
 		function getObjectName (x) {
-			if (x.object.name !== undefined) {
-				return (x.object.name + "." + x.property.name);
+			if (x.object === undefined) { //some objects don't have names
+				return ("anonymous");
 				}
 			else {
-				return (getObjectName  (x.object) + "." + x.property.name);
+				if (x.object.name !== undefined) {
+					return (x.object.name + "." + x.property.name);
+					}
+				else {
+					return (getObjectName  (x.object) + "." + x.property.name);
+					}
 				}
 			}
 		if (node.callee.name !== undefined) {
@@ -242,22 +254,28 @@ function setCodeOutlne (opmltext) {
 	viewAttsString ();
 	}
 
-function processScriptResult (val) {
-	alertDialog (val);
-	}
-function runScriptWithResult (scriptText, callback) {
-	scriptText = "(function () { " + scriptText + "}) ()";
-	scriptText = "processScriptResult (" + scriptText + ")";
-	runScriptText (scriptText, callback);
+function runButtonClick () {
+	var scriptText = getScriptTextFromSuboutline ();
+	scriptText = "alertDialog (" + scriptText + ")";
+	runScriptText (scriptText, function (err, value) {
+		if (err) {
+			console.log ("Error: " + err.message);
+			}
+		else {
+			console.log (value);
+			}
+		});
 	}
 
 
 function startup () {
 	console.log ("startup");
 	function everySecond () {
-		if (opHasChanged ()) {
+		if (opHasChanged () || flOutlineChanged) {
 			localStorage.opmltext = opOutlineToXml ();
 			opClearChanged ();
+			flOutlineChanged = false;
+			console.log ("everySecond: " + localStorage.opmltext.length + " chars saved.");
 			}
 		}
 	
@@ -279,36 +297,21 @@ function startup () {
 		opmltext = opml.stringify (theOutline);
 		}
 	opInitOutliner (opmltext, false, true);
+	$(opGetActiveOutliner ()).concord ({
+		callbacks: {
+			opCursorMoved: function (op) {
+				flOutlineChanged = true;
+				console.log ("cursor moved");
+				},
+			}
+		});
 	
 	setCodeOutlne (initialOpmltext);
 	
 	self.setInterval (everySecond, 1000); 
 	
-	$("#idCompileButton").click (function () {
-		var scriptText = getScriptTextFromSuboutline ();
-		parseScriptText (scriptText, function (err, code) {
-			hackCodeTree (code, function (err, code) { 
-				var theOutline = codeTreeToOutline (code);
-				var opmltext = opml.stringify (theOutline);
-				setCodeOutlne (opmltext);
-				});
-			});
-		$(this).blur ();
-		});
 	$("#idRunButton").click (function () {
-		var scriptText = getScriptTextFromSuboutline ();
-		
-		runScriptWithResult (scriptText, function (err, value) {
-			if (err) {
-				console.log ("Error: " + err.message);
-				}
-			else {
-				console.log (value);
-				}
-			});
-		
-		
-		
+		runButtonClick ();
 		$(this).blur ();
 		});
 	}
