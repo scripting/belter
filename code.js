@@ -2,9 +2,11 @@ var appPrefs = {
 	outlineFont: "Ubuntu",
 	outlineFontSize: 16,
 	outlineLineHeight: 24,
-	flGenerateCurlyBraces: true,
-	flGenerateSemicolons: true,
+	flGenerateCurlyBraces: false,
+	flGenerateSemicolons: false,
+	flUnicaseNames: false,
 	}
+
 
 
 function getBarcursorSummit () {
@@ -69,6 +71,13 @@ function hackCodeTree (code, callback) { //do our magic to a code tree -- 1/29/2
 	function visitCodeTree (theTree, visit) {
 		var stack = new Array ();
 		function doVisit (node) { //depth-first traversal
+			if (appPrefs.flUnicaseNames) { //xxx
+				if (node != null) {
+					if (node.type == "Identifier") {
+						node.name = node.name.toLowerCase ();
+						}
+					}
+				}
 			for (var x in node) {
 				if (typeof node [x] == "object") {
 					stack.push (node);
@@ -115,6 +124,7 @@ function preprocessScript (scriptText, callback) { //Belter syntax lives here
 		});
 	}
 function runScriptText (scriptText, callback) {
+	console.log ("runScriptText: scriptText == " + scriptText);
 	preprocessScript (scriptText, function (err, newScriptText) {
 		
 		async function runScript (theScript) {
@@ -232,6 +242,16 @@ function setCodeOutlne (opmltext) {
 	viewAttsString ();
 	}
 
+function processScriptResult (val) {
+	alertDialog (val);
+	}
+function runScriptWithResult (scriptText, callback) {
+	scriptText = "(function () { " + scriptText + "}) ()";
+	scriptText = "processScriptResult (" + scriptText + ")";
+	runScriptText (scriptText, callback);
+	}
+
+
 function startup () {
 	console.log ("startup");
 	function everySecond () {
@@ -277,7 +297,8 @@ function startup () {
 		});
 	$("#idRunButton").click (function () {
 		var scriptText = getScriptTextFromSuboutline ();
-		runScriptText (scriptText, function (err, value) {
+		
+		runScriptWithResult (scriptText, function (err, value) {
 			if (err) {
 				console.log ("Error: " + err.message);
 				}
@@ -285,6 +306,8 @@ function startup () {
 				console.log (value);
 				}
 			});
+		
+		
 		
 		$(this).blur ();
 		});
