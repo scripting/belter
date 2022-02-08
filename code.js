@@ -67,6 +67,13 @@ function getScriptTextFromSuboutline () { //v2 -- 1/31/22 by DW
 	return (theText);
 	}
 
+
+function testWrapping () {
+	var text = "(async function () {" + "xxx; yyy; zzz;" + "}) ()";
+	var code = acorn.parse (text, {ecmaVersion: 2020});
+	opInsertObject (undefined, code);
+	}
+
 function hackCodeTree (code, callback) { //do our magic to a code tree -- 1/29/22 by DW
 	function visitCodeTree (theTree, visit) {
 		var stack = new Array ();
@@ -91,13 +98,13 @@ function hackCodeTree (code, callback) { //do our magic to a code tree -- 1/29/2
 			}
 		doVisit (theTree);
 		}
-	function fixSpecialFunctionCalls (theTree) {
+	function fixFunctionsAndCalls (theTree) {
 		visitCodeTree (theTree, function (node, stack) {
 			if (node.type == "FunctionDeclaration" || node.type == 'FunctionExpression') {
 				node.async = true;
 				}
 			if (node.type == "CallExpression" && node.callee !== undefined) {
-				var nodecopy = Object.assign(new Object (), node);
+				var nodecopy = Object.assign (new Object (), node);
 				for (var x in node) {
 					delete node [x];
 					}
@@ -107,7 +114,7 @@ function hackCodeTree (code, callback) { //do our magic to a code tree -- 1/29/2
 			return (undefined); // don't replace
 			});
 		}
-	fixSpecialFunctionCalls (code);
+	fixFunctionsAndCalls (code);
 	callback (undefined, code);
 	}
 function parseScriptText (scriptText, callback) {
@@ -115,7 +122,6 @@ function parseScriptText (scriptText, callback) {
 	callback (undefined, code);
 	}
 function viewCodeTree (theTree) {
-	console.log ("viewCodeTree: theTree == \n" + jsonStringify (theTree));
 	var theOutline = codeTreeToOutline (theTree);
 	var opmltext = opml.stringify (theOutline);
 	setCodeOutlne (opmltext);
@@ -123,7 +129,9 @@ function viewCodeTree (theTree) {
 function preprocessScript (scriptText, callback) { //Belter syntax lives here
 	parseScriptText (scriptText, function (err, theCodeTree) {
 		hackCodeTree (theCodeTree, function (err, newCodeTree) {
-			viewCodeTree (newCodeTree); //2/3/22 by DW
+			
+			insertCodeTree (newCodeTree); 
+			
 			var newScriptText = escodegen.generate (newCodeTree);
 			newScriptText = "(async function () {" + newScriptText + "}) ()";
 			callback (undefined, newScriptText);
@@ -133,6 +141,7 @@ function preprocessScript (scriptText, callback) { //Belter syntax lives here
 function runScriptText (scriptText, callback) {
 	console.log ("runScriptText: scriptText == " + scriptText);
 	preprocessScript (scriptText, function (err, newScriptText) {
+		console.log ("runScriptText: newScriptText == " + newScriptText);
 		
 		async function runScript (theScript) {
 			var val = eval (theScript);
@@ -253,20 +262,37 @@ function setCodeOutlne (opmltext) {
 		});
 	viewAttsString ();
 	}
-
+function insertCodeTree (theTree) {
+	var idOrigOutliner = idDefaultOutliner;
+	idDefaultOutliner = "idCodeTreeOutline";
+	opInsertObject (undefined, theTree);
+	opFirstSummit ();
+	opDeleteLine ();
+	opExpandEverything ();
+	idDefaultOutliner = idOrigOutliner;
+	$("#idCodeTreeOutline").concord ({
+		callbacks: {
+			opCursorMoved: function (op) {
+				viewAttsString ();
+				},
+			}
+		});
+	}
+function viewScriptResult (theResult) {
+	$("#idScriptResult").text (theResult);
+	}
 function runButtonClick () {
 	var scriptText = getScriptTextFromSuboutline ();
-	scriptText = "alertDialog (" + scriptText + ")";
+	scriptText = "viewScriptResult (" + scriptText + ")";
 	runScriptText (scriptText, function (err, value) {
 		if (err) {
-			console.log ("Error: " + err.message);
+			viewScriptResult ("Error: " + err.message);
 			}
 		else {
 			console.log (value);
 			}
 		});
 	}
-
 
 function startup () {
 	console.log ("startup");

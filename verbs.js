@@ -1,4 +1,6 @@
 
+var urlStateNames = "http://localhost:1444/getallstates"; 
+
 function httpRequest (url, timeout, headers, callback) {
 	timeout = (timeout === undefined) ? 30000 : timeout;
 	var jxhr = $.ajax ({ 
@@ -26,6 +28,21 @@ function httpRequest (url, timeout, headers, callback) {
 		});
 	}
 function servercall (path, params, flAuthenticated, callback, urlServer=appConsts.urlTwitterServer) {
+	function drummerBuildParamList (paramtable, flPrivate) { //8/4/21 by DW
+		var s = "";
+		if (flPrivate) {
+			paramtable.flprivate = "true";
+			}
+		for (var x in paramtable) {
+			if (paramtable [x] !== undefined) { //8/4/21 by DW
+				if (s.length > 0) {
+					s += "&";
+					}
+				s += x + "=" + encodeURIComponent (paramtable [x]);
+				}
+			}
+		return (s);
+		}
 	var whenstart = new Date ();
 	if (params === undefined) {
 		params = new Object ();
@@ -46,8 +63,32 @@ function servercall (path, params, flAuthenticated, callback, urlServer=appConst
 			}
 		});
 	}
+function testGetStateNames () {
+	servercall ("getallstates", undefined, true, function (err, data) {
+		if (err) {
+			console.log (err.message);
+			}
+		else {
+			console.log (data);
+			}
+		});
+	}
 
-var test = {
+
+
+var belter = {
+	getStateNames: function () {
+		return new Promise (function (resolve, reject) {
+			httpRequest (urlStateNames, undefined, undefined, function (err, jsontext) {
+				if (err) {
+					reject (err);
+					}
+				else {
+					resolve (JSON.parse (jsontext)); 
+					}
+				});
+			});
+		},
 	
 	errorFunc: function () {
 		alert (undefinedvariable);

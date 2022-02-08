@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Belter</title>
+		<title>Belter</title> 
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		
@@ -31,17 +31,25 @@
 		<script src="http://scripting.com/code/opmlpackage/client/opml.js"></script>
 		
 		
-		<script src="//scripting.com/code/motd/code.js"></script>
-		<link href="//scripting.com/code/motd/styles.css" rel="stylesheet" type="text/css">
 		
 		<script src="http://scripting.com/code/belter/acorn.js"></script>
 		<script src="http://scripting.com/code/belter/escodegen.browser.js"></script>
 		
-		<script src="http://scripting.com/code/testing/belter/verbs.js"></script>
+		<script src="http://scripting.com/code/belter/verbs.js"></script>
+		<script src="//scripting.com/code/belter/code.js"></script>
+		<link href="//scripting.com/code/belter/styles.css" rel="stylesheet" type="text/css">
 		
-		<script src="//scripting.com/code/testing/belter/code.js"></script>
-		<link href="//scripting.com/code/testing/belter/styles.css" rel="stylesheet" type="text/css">
-		
+		<script>
+			var appConsts = {
+				productname: "[%productName%]",
+				productnameForDisplay: "[%productnameForDisplay%]",
+				version: "[%version%]",
+				urlTwitterServer: "[%urlServerForClient%]",
+				urlSocketServer: "[%urlWebsocketServerForClient%]",
+				flEnableLogin: [%flEnableLogin%],
+				flUseSockets: true
+				}
+			</script>
 		</head>
 	<body>
 		<div class="divMenubar" id="idMenubar">
@@ -71,6 +79,7 @@
 					</div>
 				<div class="divButtons">
 					<button class="btn btn-large" type="button" id="idRunButton">Run</button>
+					<span id="idScriptResult"></span>
 					</div>
 				</div>
 			<div class="divEditors">

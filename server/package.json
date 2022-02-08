@@ -1,0 +1,13 @@
+{
+	"name": "testdaveappserver",
+	"description": "Bare bones demo app for daveappserver package.",
+	"author": "Dave Winer <dave@scripting.com>",
+	"main": "belter.js",
+	"license": "MIT",
+	"version": "0.4.0",
+	"dependencies" : {
+		"daveutils": "*",
+		"davefilesystem": "*",
+		"daveappserver": "*"
+		} 
+	}
