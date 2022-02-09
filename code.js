@@ -99,10 +99,6 @@ function visitCodeTree (theTree, visit) {
 		}
 	doVisit (theTree);
 	}
-function hackCodeTree (code, callback) { //do our magic to a code tree -- 1/29/22 by DW
-	fixFunctionsAndCalls (code);
-	callback (undefined, code);
-	}
 function fixFunctionsAndCalls (theTree) {
 	visitCodeTree (theTree, function (node, stack) {
 		if (appPrefs.flUnicaseNames) { 
@@ -154,11 +150,6 @@ function addReturnStatement (scriptText) {
 	console.log ("addReturnStatement: newScriptText == " + newScriptText);
 	return (newScriptText);
 	}
-function viewCodeTree (theTree) {
-	var theOutline = codeTreeToOutline (theTree);
-	var opmltext = opml.stringify (theOutline);
-	setCodeOutlne (opmltext);
-	}
 function wrapCode (theTree) {
 	var myWrapper = copyObject (codeWrapper);
 	visitCodeTree (myWrapper, function (node, stack) {
@@ -171,35 +162,6 @@ function wrapCode (theTree) {
 			}
 		});
 	return (myWrapper);
-	}
-
-function preprocessScript (scriptText) { //Belter syntax lives here
-	var theCodeTree = acorn.parse (scriptText, {ecmaVersion: 2020});
-	fixFunctionsAndCalls (theCodeTree); //make all function declarations async and call all functions with await
-	scriptText = escodegen.generate (theCodeTree);
-	scriptText = "(async function () {" + scriptText + "}) ()";
-	return (scriptText);
-	}
-function runScriptText (scriptText, callback) {
-	console.log ("runScriptText: scriptText == " + scriptText);
-	try {
-		scriptText = preprocessScript (scriptText);
-		console.log ("runScriptText: scriptText == " + scriptText);
-		async function runScript (theScript) {
-			var val = eval (theScript);
-			return (val);
-			}
-		runScript (scriptText)
-			.then (function (response) {
-				callback (undefined, response)
-				})
-			.catch (function (err) {
-				callback (err)
-				});
-		}
-	catch (err) {
-		callback (err)
-		}
 	}
 function codeTreeToOutline (theTree) {
 	var theOutline = {
@@ -277,19 +239,6 @@ function codeTreeToOutline (theTree) {
 	doLevel (theTree, "", theOutline.opml.body.subs);
 	return (theOutline);
 	}
-function viewAttsString () {
-	function getCodeAttsString () {
-		var idOrigOutliner = idDefaultOutliner;
-		idDefaultOutliner = "idCodeTreeOutline";
-		
-		var atts = opGetAttsDisplayString ();
-		
-		idDefaultOutliner = idOrigOutliner;
-		
-		return (atts);
-		}
-	$("#idAttsDisplay").html (getCodeAttsString () + " ");
-	}
 function setCodeOutlne (opmltext) {
 	var idOrigOutliner = idDefaultOutliner;
 	idDefaultOutliner = "idCodeTreeOutline";
@@ -304,6 +253,54 @@ function setCodeOutlne (opmltext) {
 			}
 		});
 	viewAttsString ();
+	}
+function viewCodeTree (theTree) {
+	var theOutline = codeTreeToOutline (theTree);
+	var opmltext = opml.stringify (theOutline);
+	setCodeOutlne (opmltext);
+	}
+
+function preprocessScript (scriptText) { //Belter syntax lives here
+	var theCodeTree = acorn.parse (scriptText, {ecmaVersion: 2020});
+	fixFunctionsAndCalls (theCodeTree); //make all function declarations async and call all functions with await
+	viewCodeTree (theCodeTree); //show the code in the right panel on the screen
+	scriptText = escodegen.generate (theCodeTree);
+	scriptText = "(async function () {" + scriptText + "}) ()";
+	return (scriptText);
+	}
+function runScriptText (scriptText, callback) {
+	console.log ("runScriptText: scriptText == " + scriptText);
+	try {
+		scriptText = preprocessScript (scriptText);
+		console.log ("runScriptText: scriptText == " + scriptText);
+		async function runScript (theScript) {
+			var val = eval (theScript);
+			return (val);
+			}
+		runScript (scriptText)
+			.then (function (response) {
+				callback (undefined, response)
+				})
+			.catch (function (err) {
+				callback (err)
+				});
+		}
+	catch (err) {
+		callback (err)
+		}
+	}
+function viewAttsString () {
+	function getCodeAttsString () {
+		var idOrigOutliner = idDefaultOutliner;
+		idDefaultOutliner = "idCodeTreeOutline";
+		
+		var atts = opGetAttsDisplayString ();
+		
+		idDefaultOutliner = idOrigOutliner;
+		
+		return (atts);
+		}
+	$("#idAttsDisplay").html (getCodeAttsString () + " ");
 	}
 function insertCodeTree (theTree) {
 	var idOrigOutliner = idDefaultOutliner;
