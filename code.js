@@ -9,6 +9,22 @@ var appPrefs = {
 
 var flOutlineChanged = false;
 
+function copyObject (source) {
+	var dest = new Object ();
+	function docopy (source, dest) {
+		for (var x in source) {
+			if (typeof source [x] == "object") {
+				dest [x] = new Object ();
+				docopy (source [x], dest [x]);
+				}
+			else {
+				dest [x] = source [x]
+				}
+			}
+		}
+	docopy (source, dest);
+	return (dest);
+	}
 function getBarcursorSummit () {
 	var barcursor = opGetBarCursor (), theSummit;
 	barcursor.visitToSummit (function (theNode) {
@@ -62,101 +78,128 @@ function getScriptTextFromSuboutline () { //v2 -- 1/31/22 by DW
 			}
 		}
 	addlevel (theSubOutline);
-	theText = "(function () { " + theText + "}) ()"; //2/3/22 by DW
 	console.log ("getScriptTextFromSuboutline: theText == \n" + theText);
 	return (theText);
 	}
 
 
-function testWrapping () {
-	var text = "(async function () {" + "xxx; yyy; zzz;" + "}) ()";
-	var code = acorn.parse (text, {ecmaVersion: 2020});
-	opInsertObject (undefined, code);
-	}
-
-function hackCodeTree (code, callback) { //do our magic to a code tree -- 1/29/22 by DW
-	function visitCodeTree (theTree, visit) {
-		var stack = new Array ();
-		function doVisit (node) { //depth-first traversal
-			if (appPrefs.flUnicaseNames) { //xxx
-				if (node != null) {
-					if (node.type == "Identifier") {
-						node.name = node.name.toLowerCase ();
-						}
-					}
-				}
-			for (var x in node) {
-				if (typeof node [x] == "object") {
-					stack.push (node);
-					doVisit (node [x], visit);
-					stack.pop ();
-					}
-				}
-			if (node != null) {
-				visit (node, stack);
+function visitCodeTree (theTree, visit) {
+	var stack = new Array ();
+	function doVisit (node) { //depth-first traversal
+		for (var x in node) {
+			if (typeof node [x] == "object") {
+				stack.push (node);
+				doVisit (node [x], visit);
+				stack.pop ();
 				}
 			}
-		doVisit (theTree);
+		if (node != null) {
+			visit (node, stack);
+			}
 		}
-	function fixFunctionsAndCalls (theTree) {
-		visitCodeTree (theTree, function (node, stack) {
-			if (node.type == "FunctionDeclaration" || node.type == 'FunctionExpression') {
-				node.async = true;
-				}
-			if (node.type == "CallExpression" && node.callee !== undefined) {
-				var nodecopy = Object.assign (new Object (), node);
-				for (var x in node) {
-					delete node [x];
-					}
-				node.type = "AwaitExpression";
-				node.argument = nodecopy;
-				}
-			return (undefined); // don't replace
-			});
-		}
+	doVisit (theTree);
+	}
+function hackCodeTree (code, callback) { //do our magic to a code tree -- 1/29/22 by DW
 	fixFunctionsAndCalls (code);
 	callback (undefined, code);
 	}
-function parseScriptText (scriptText, callback) {
+function fixFunctionsAndCalls (theTree) {
+	visitCodeTree (theTree, function (node, stack) {
+		if (appPrefs.flUnicaseNames) { 
+			if (node != null) {
+				if (node.type == "Identifier") {
+					node.name = node.name.toLowerCase ();
+					}
+				}
+			}
+		if (node.type == "FunctionDeclaration" || node.type == 'FunctionExpression') {
+			node.async = true;
+			}
+		if (node.type == "CallExpression" && node.callee !== undefined) {
+			var nodecopy = Object.assign (new Object (), node);
+			for (var x in node) {
+				delete node [x];
+				}
+			node.type = "AwaitExpression";
+			node.argument = nodecopy;
+			}
+		return (undefined); // don't replace
+		});
+	}
+function addReturnStatement (scriptText) {
 	var code = acorn.parse (scriptText, {ecmaVersion: 2020});
-	callback (undefined, code);
+	insertCodeTree (code); 
+	
+	var core = code.body [0].expression.callee.body.body; //an array
+	var lastelement = core [core.length - 1];
+	insertCodeTree (lastelement); 
+	
+	
+	var returnStatement = { 
+		type: "ReturnStatement",
+		start: 25,
+		end: 38,
+		argument: {
+			"type": "Identifier",
+			"start": 33,
+			"end": 36,
+			"name": "zzz"
+			}
+		}
+	
+	returnStatement.argument = copyObject (lastelement);
+	core [core.length - 1] = returnStatement;
+	
+	var newScriptText = escodegen.generate (code);
+	console.log ("addReturnStatement: newScriptText == " + newScriptText);
+	return (newScriptText);
 	}
 function viewCodeTree (theTree) {
 	var theOutline = codeTreeToOutline (theTree);
 	var opmltext = opml.stringify (theOutline);
 	setCodeOutlne (opmltext);
 	}
-function preprocessScript (scriptText, callback) { //Belter syntax lives here
-	parseScriptText (scriptText, function (err, theCodeTree) {
-		hackCodeTree (theCodeTree, function (err, newCodeTree) {
-			
-			insertCodeTree (newCodeTree); 
-			
-			var newScriptText = escodegen.generate (newCodeTree);
-			newScriptText = "(async function () {" + newScriptText + "}) ()";
-			callback (undefined, newScriptText);
-			});
+function wrapCode (theTree) {
+	var myWrapper = copyObject (codeWrapper);
+	visitCodeTree (myWrapper, function (node, stack) {
+		if (node.body !== undefined) {
+			if (typeof node.body != "object") {
+				if (node.body == "replaceMePlease") {
+					node.body = theTree.body [0];
+					}
+				}
+			}
 		});
+	return (myWrapper);
+	}
+
+function preprocessScript (scriptText) { //Belter syntax lives here
+	var theCodeTree = acorn.parse (scriptText, {ecmaVersion: 2020});
+	fixFunctionsAndCalls (theCodeTree); //make all function declarations async and call all functions with await
+	scriptText = escodegen.generate (theCodeTree);
+	scriptText = "(async function () {" + scriptText + "}) ()";
+	return (scriptText);
 	}
 function runScriptText (scriptText, callback) {
 	console.log ("runScriptText: scriptText == " + scriptText);
-	preprocessScript (scriptText, function (err, newScriptText) {
-		console.log ("runScriptText: newScriptText == " + newScriptText);
-		
+	try {
+		scriptText = preprocessScript (scriptText);
+		console.log ("runScriptText: scriptText == " + scriptText);
 		async function runScript (theScript) {
 			var val = eval (theScript);
 			return (val);
 			}
-		
-		runScript (newScriptText)
+		runScript (scriptText)
 			.then (function (response) {
 				callback (undefined, response)
 				})
 			.catch (function (err) {
 				callback (err)
 				});
-		
-		});
+		}
+	catch (err) {
+		callback (err)
+		}
 	}
 function codeTreeToOutline (theTree) {
 	var theOutline = {
@@ -283,7 +326,9 @@ function viewScriptResult (theResult) {
 	}
 function runButtonClick () {
 	var scriptText = getScriptTextFromSuboutline ();
+	
 	scriptText = "viewScriptResult (" + scriptText + ")";
+	
 	runScriptText (scriptText, function (err, value) {
 		if (err) {
 			viewScriptResult ("Error: " + err.message);
@@ -297,11 +342,13 @@ function runButtonClick () {
 function startup () {
 	console.log ("startup");
 	function everySecond () {
-		if (opHasChanged () || flOutlineChanged) {
-			localStorage.opmltext = opOutlineToXml ();
-			opClearChanged ();
-			flOutlineChanged = false;
-			console.log ("everySecond: " + localStorage.opmltext.length + " chars saved.");
+		if (idDefaultOutliner == "outliner") {
+			if (opHasChanged () || flOutlineChanged) {
+				localStorage.opmltext = opOutlineToXml ();
+				opClearChanged ();
+				flOutlineChanged = false;
+				console.log ("everySecond: " + localStorage.opmltext.length + " chars saved.");
+				}
 			}
 		}
 	
@@ -335,7 +382,6 @@ function startup () {
 	setCodeOutlne (initialOpmltext);
 	
 	self.setInterval (everySecond, 1000); 
-	
 	$("#idRunButton").click (function () {
 		runButtonClick ();
 		$(this).blur ();
