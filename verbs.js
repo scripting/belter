@@ -1,206 +1,122 @@
 
-var urlStateNames = "http://localhost:1444/getallstates"; 
-
-function httpRequest (url, timeout, headers, callback) {
-	timeout = (timeout === undefined) ? 30000 : timeout;
-	var jxhr = $.ajax ({ 
-		url: url,
-		dataType: "text", 
-		headers,
-		timeout
-		}) 
-	.success (function (data, status) { 
-		callback (undefined, data);
-		}) 
-	.error (function (status) { 
-		var message;
-		try { //9/18/21 by DW
-			message = JSON.parse (status.responseText).message;
-			}
-		catch (err) {
-			message = status.responseText;
-			}
-		var err = {
-			code: status.status,
-			message
-			};
-		callback (err);
-		});
-	}
-function servercall (path, params, flAuthenticated, callback, urlServer=appConsts.urlTwitterServer) {
-	function drummerBuildParamList (paramtable, flPrivate) { //8/4/21 by DW
-		var s = "";
-		if (flPrivate) {
-			paramtable.flprivate = "true";
-			}
-		for (var x in paramtable) {
-			if (paramtable [x] !== undefined) { //8/4/21 by DW
-				if (s.length > 0) {
-					s += "&";
-					}
-				s += x + "=" + encodeURIComponent (paramtable [x]);
+var string = {
+	addPeriodAtEnd: function (s) {
+		return (addPeriodAtEnd (s.toString ()));
+		},
+	maxStringLength: maxStringLength,
+	bumpUrlString: bumpUrlString,
+	addCommas: stringAddCommas,
+	decodeXml: decodeXml,
+	randomSnarkySlogan: getRandomSnarkySlogan,
+	formatDate: formatDate,
+	beginsWith: beginsWith,
+	contains: stringContains,
+	countFields: stringCountFields,
+	dayOfWeekToString: dayOfWeekToString,
+	delete: stringDelete,
+	encodeHtml: function (s) {
+		return s.replace(/[\u00A0-\u9999<>\&]/g, function(i) {
+			return '&#'+i.charCodeAt(0)+';';
+			});
+		},
+	endsWith: endsWith,
+	filledString: filledString,
+	getRandomPassword: getRandomPassword,
+	hashMD5: function (s) {
+		return (SparkMD5.hash (s));
+		},
+	innerCaseName: innerCaseName,
+	insert: stringInsert,
+	isAlpha: isAlpha,
+	isNumeric: isNumeric,
+	isWhitespace: isWhitespace,
+	isPunctuation: isPunctuation,
+	lastField: stringLastField,
+	lower: stringLower,
+	upper: stringUpper,
+	mid: stringMid,
+	monthToString: monthToString, //January, February etc.
+	nthField: stringNthField,
+	padWithZeros: padWithZeros,
+	popLastField: stringPopLastField,
+	popTrailing: function (s, ch) { //11/25/13 by DW
+		while (s.length > 0) {
+			if (s [s.length - 1] != ch) {
+				break;
 				}
+			s = string.delete (s, s.length, 1);
 			}
 		return (s);
-		}
-	var whenstart = new Date ();
-	if (params === undefined) {
-		params = new Object ();
-		}
-	if (flAuthenticated) { //1/11/21 by DW
-		params.oauth_token = localStorage.twOauthToken;
-		params.oauth_token_secret = localStorage.twOauthTokenSecret;
-		}
-	var url = urlServer + path + "?" + drummerBuildParamList (params, false);
-	httpRequest (url, undefined, undefined, function (err, jsontext) {
-		if (err) {
-			console.log ("servercall: url == " + url + ", err.message == " + err.message);
-			callback (err);
+		},
+	popExtension: stringPopExtension, //1/18/17 by DW
+	replaceAll: replaceAll,
+	multipleReplaceAll: multipleReplaceAll, //1/18/17 by DW
+	stripMarkup: stripMarkup,
+	trimLeading: function (s, ch) {
+		if (ch == undefined) {
+			ch = " ";
+			}
+		return (trimLeading (s, ch));
+		},
+	trimTrailing: function (s, ch) {
+		if (ch == undefined) {
+			ch = " ";
+			}
+		return (trimTrailing (s, ch));
+		},
+	trimWhitespace: function (s, ch) { //8/24/13 by DWextensionToMimeType
+		if (ch == undefined) {
+			ch = " ";
+			}
+		return (trimLeading (trimTrailing (s, ch), ch))
+		},
+	extensionToMimeType: function (filepath) { //8/4/21 by DW
+		const ext = stringLastField (filepath, "."); 
+		if (ext == filepath) { //no extension
+			return (undefined);
 			}
 		else {
-			console.log ("servercall: url == " + url + ", secs == " + secondsSince (whenstart)); 
-			callback (undefined, JSON.parse (jsontext));
+			return (httpExt2MIME (ext));
 			}
-		});
+		},
+	markdownProcess: function (s) { //11/2/21 by DW
+		var md = new Markdown.Converter ();
+		return (md.makeHtml (s));
+		}
 	}
-function testGetStateNames () {
-	servercall ("getallstates", undefined, true, function (err, data) {
-		if (err) {
-			console.log (err.message);
+var date = {
+	sameDay: sameDay,
+	sameMonth: sameMonth,
+	dayGreaterThanOrEqual: dayGreaterThanOrEqual,
+	secondsSince: secondsSince,
+	yesterday: dateYesterday,
+	tomorrow: dateTomorrow,
+	netStandardString: function (theDate) { //12/17/13 by DW
+		return (new Date (theDate).toUTCString ());
+		},
+	convertToTimeZone: function (when, timeZoneString="0") { //11/15/21 by DW
+		function processTimeZoneString (s) { //convert someting like 5:30 to 5.5
+			var splits = s.split (":");
+			if (splits.length == 2) {
+				var ctsecs = Number (splits [1]);
+				var hourFraction = ctsecs / 60;
+				if (s [0] == "-") {
+					hourFraction = -hourFraction;
+					}
+				s = Number (splits [0]) + hourFraction;
+				}
+			return (s);
 			}
-		else {
-			console.log (data);
-			}
-		});
+		var offset = Number (processTimeZoneString (timeZoneString));
+		var d = new Date (when);
+		var localTime = d.getTime ();
+		var localOffset = d.getTimezoneOffset () *  60000;
+		var utc = localTime + localOffset;
+		var blogTime = utc + (3600000 * offset);
+		return (new Date (blogTime));
+		}
 	}
 
 
-
-var belter = {
-	getStateNames: function () {
-		return new Promise (function (resolve, reject) {
-			httpRequest (urlStateNames, undefined, undefined, function (err, jsontext) {
-				if (err) {
-					reject (err);
-					}
-				else {
-					resolve (JSON.parse (jsontext)); 
-					}
-				});
-			});
-		},
-	
-	errorFunc: function () {
-		alert (undefinedvariable);
-		}
-	
-	
-	
-	}
-var http = {
-	readUrl: function (url, flUseProxyServer) {
-		if (flUseProxyServer === undefined) {
-			flUseProxyServer = true;
-			}
-		if (flUseProxyServer) {
-			return new Promise (function (resolve, reject) {
-				console.log ("Using proxy server.");
-				servercall ("httpreadurl", {url}, true, function (err, data) {
-					if (err) {
-						reject (err);
-						}
-					else {
-						resolve (data); 
-						}
-					});
-				});
-			}
-		else {
-			return new Promise (function (resolve, reject) {
-				console.log ("Not using proxy server.");
-				httpRequest (url, undefined, undefined, function (err, data) {
-					if (err) {
-						reject (err);
-						}
-					else {
-						resolve (data); 
-						}
-					});
-				});
-			}
-		},
-	derefUrl: function (url) { //9/17/21 by DW
-		return new Promise (function (resolve, reject) {
-			servercall ("derefurl", {url}, true, function (err, data) {
-				if (err) {
-					reject (err);
-					}
-				else {
-					resolve (data.longurl); 
-					}
-				});
-			});
-		},
-	client: function (options, flUseProxyServer=true) { //11/5/21 by DW
-		var request = { //defaults
-			type: "GET",
-			url: undefined, //defaults to the current page
-			data: undefined,
-			params: undefined,
-			headers: {
-				"User-Agent": drummer.productname () + " v" + drummer.version ()
-				}
-			}
-		if (options.headers !== undefined) { //11/7/21 by DW
-			for (var x in options.headers) {
-				request.headers [x] = options.headers [x];
-				}
-			}
-		for (var x in options) {
-			if (x != "headers") {
-				request [x] = options [x];
-				}
-			}
-		if (request.data !== undefined) {
-			if (!$.isPlainObject (request.data) && (typeof (request.data) != "string")) { //8/2/21 by DW
-				request.data = request.data.toString ();
-				}
-			}
-		if (request.params !== undefined) {
-			request.url += "?" + drummerBuildParamList (request.params);
-			}
-		if (flUseProxyServer) {
-			return new Promise (function (resolve, reject) {
-				var proxyRequest = {
-					method: request.type,
-					url: request.url,
-					body: request.data,
-					headers: request.headers
-					};
-				var jsontext = jsonStringify (proxyRequest);
-				servercall ("httprequest", {request: jsontext}, true, function (err, data) {
-					if (err) {
-						reject (err);
-						}
-					else {
-						resolve (data); 
-						}
-					});
-				});
-			}
-		else {
-			return new Promise (function (resolve, reject) {
-				$.ajax (request)
-					.success (function (data, status) { 
-						resolve (data); 
-						}) 
-					.error (function (status) { 
-						var err = JSON.parse (status.responseText);
-						reject (err);
-						});
-				});
-			}
-		}
-	}
 
 

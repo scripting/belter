@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Belter</title> 
+		<title>[%productNameForDisplay%]</title> 
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		
@@ -30,15 +30,15 @@
 		
 		<script src="http://scripting.com/code/opmlpackage/client/opml.js"></script>
 		
-		
-		
 		<script src="http://scripting.com/code/belter/acorn.js"></script>
 		<script src="http://scripting.com/code/belter/escodegen.browser.js"></script>
 		
 		<script src="http://scripting.com/code/belter/verbs.js"></script>
-		<script src="http://scripting.com/code/belter/fragments.js"></script>
-		<script src="//scripting.com/code/belter/code.js"></script>
-		<link href="//scripting.com/code/belter/styles.css" rel="stylesheet" type="text/css">
+		
+		<script src="http://scripting.com/code/belter/client/code.js"></script>
+		
+		<script src="http://scripting.com/code/belter/examples/outliner/code.js"></script>
+		<link href="http://scripting.com/code/belter/examples/outliner/styles.css" rel="stylesheet" type="text/css">
 		
 		<script>
 			var appConsts = {
@@ -61,7 +61,7 @@
 						</div>
 					<div class="navbar-inner">
 						<div class="container">
-							<a class="brand" onclick="clickHome ()"><span id="idMenuProductName">Belter</span></a>
+							<a class="brand" onclick="clickHome ()"><span id="idMenuProductName">[%productNameForDisplay%]</span></a>
 							<ul class="nav" id="idMainMenuList">
 								<li class="dropdown" id="idMainMenu"> 
 									<a href="#" class="dropdown-toggle" data-toggle="dropdown">Menu&nbsp;<b class="caret"></b></a>
