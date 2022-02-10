@@ -153,7 +153,6 @@ function runButtonClick () {
 	var scriptText = getScriptTextFromSuboutline ();
 	scriptText = "(async function () {" + scriptText + "}) ()";
 	scriptText = "viewScriptResult (" + scriptText + ")";
-	
 	runScriptText (scriptText, function (err, value) {
 		if (err) {
 			viewScriptResult ("Error: " + err.message);
