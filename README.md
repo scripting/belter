@@ -12,7 +12,7 @@ The plan is also to have a version that runs in Node apps.
 
 #### Verbs
 
-verbs.js includes string and date verbs from Drummer, these become attached to the Belter language, and the set will grow over time. They are functions that work in both the client and server environment. 
+<a href="https://github.com/scripting/Belter/blob/main/verbs.js">verbs.js</a> includes string and date verbs from Drummer, these become attached to the Belter language, and the set will grow over time. They are functions that work in both the client and server environment. 
 
 The intention is then to have packages of verbs for each of the environment, for example file system verbs that run in the server environment and DOM verbs for browser-based Belter apps. 
 
@@ -22,11 +22,11 @@ Also some networking functions, such as GitHub and Twitter verbs will run in bot
 
 #### Example app -- an outliner
 
-This is a place to type in test scripts, in the left panel, and in the right panel you'll see the code tree Belter generates.
+This is a place to type in test scripts, in the left panel, and in the right panel you'll see the code tree Belter generates. Here's the <a href="https://github.com/scripting/Belter/tree/main/examples/outliner">code</a>. <a href="http://scripting.com/images/2022/02/10/belterOutlinerScreen.png">Screen shot</a>.
 
 #### The server for the example app
 
-There is a server app for the outliner, just needed for testing asynchronous calling. 
+There is a <a href="https://github.com/scripting/Belter/tree/main/server">server app</a> for the outliner, just needed for testing asynchronous calling. 
 
 It's conceivable that at some point in the future it will also serve as a testbed for the server version of Belter. 
 
@@ -38,7 +38,7 @@ Then we make changes to the code tree.
 
 And generate the JavaScript text by decompiling the modified code tree using <a href="https://github.com/estools/escodegen">Escodegen.</a>
 
-There are copies of the client versions of both in the main folder for Belter, you can see they are included in the head section of the example outliner. 
+There are <a href="http://scripting.com/code/belter/acorn.js">copies</a> of the client versions of <a href="http://scripting.com/code/belter/escodegen.browser.js">both</a> in the main folder for Belter, you can see they are included in the head section of the example outliner. 
 
 ### Using the outliner
 
