@@ -1,0 +1,18 @@
+{
+	"productName": "belter",
+	"productNameForDisplay": "Belter Outliner",
+	
+	"urlServerHomePageSource": "http://scripting.com/code/belter/examples/outliner/index.html",
+	
+	"prefsPath": "prefs.json",
+	"docsPath": "",
+	
+	"port": 1444,
+	"flWebsocketEnabled": true,
+	"websocketPort": 1445,
+	
+	"myDomain": "localhost:1444",
+	
+	"twitterConsumerKey": "xxx",
+	"twitterConsumerSecret": "xxx"
+	}

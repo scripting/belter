@@ -1,6 +1,6 @@
 {
-	"name": "testdaveappserver",
-	"description": "Bare bones demo app for daveappserver package.",
+	"name": "belterserver",
+	"description": "Backend for belter language testing.",
 	"author": "Dave Winer <dave@scripting.com>",
 	"main": "belter.js",
 	"license": "MIT",
