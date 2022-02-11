@@ -58,7 +58,9 @@ In the server sub-folder: <code>npm install</code>
 
 Run the server app: <code>node belter.js</code>
 
-</code>In the browser open <code>localhost:1444
+config.json should work without editing. We don't do anything with identity at this time, so you don't need to set up the access token for Twitter. 
+
+</code>In the browser open <code>localhost:1444</code>
 
 The editor should open in the browser. 
 
