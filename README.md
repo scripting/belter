@@ -50,3 +50,19 @@ The outliner can run scripts two ways:
 
 The outliner is a good tool for exploring how the code generator for JavaScript works. 
 
+### If you want to try it out
+
+Download the project folder. 
+
+In the server sub-folder: npm install.
+
+Run the server app: node belter.js.
+
+In the browser open localhost:1444.
+
+The editor should open in the browser. 
+
+Look at the <a href="http://scripting.com/images/2022/02/10/belterOutlinerScreen.png">screen shot</a> for ideas.
+
+There will be more docs. ;-)
+
