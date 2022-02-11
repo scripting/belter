@@ -52,13 +52,13 @@ The outliner is a good tool for exploring how the code generator for JavaScript 
 
 ### If you want to try it out
 
-Download the project folder. 
+<a href="https://github.com/scripting/Belter/archive/refs/heads/main.zip">Download</a> the project folder. 
 
-In the server sub-folder: npm install.
+In the server sub-folder: <code>npm install</code>
 
-Run the server app: node belter.js.
+Run the server app: <code>node belter.js</code>
 
-In the browser open localhost:1444.
+</code>In the browser open <code>localhost:1444
 
 The editor should open in the browser. 
 
