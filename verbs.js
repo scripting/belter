@@ -1,9 +1,25 @@
 
 var string = {
 	addPeriodAtEnd: function (s) {
-		return (addPeriodAtEnd (s.toString ()));
+		s = s.toString ();
+		if (utils !== undefined) { //server
+			return (utils.addPeriodAtEnd (s));
+			}
+		else { //client
+			return (addPeriodAtEnd (s));
+			}
 		},
-	maxStringLength: maxStringLength,
+	
+	maxStringLength: function (s, len, flWholeWordAtEnd, flAddElipses) {
+		if (utils !== undefined) { //server
+			return (utils.maxStringLength (s, len, flWholeWordAtEnd, flAddElipses));
+			}
+		else { //client
+			return (utils.maxStringLength (s, len, flWholeWordAtEnd, flAddElipses));
+			}
+		},
+	
+	
 	bumpUrlString: bumpUrlString,
 	addCommas: stringAddCommas,
 	decodeXml: decodeXml,

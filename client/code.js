@@ -163,7 +163,6 @@ function preprocessScript (scriptText) { //Belter syntax lives here
 	return (scriptText);
 	}
 function runScriptText (scriptText, callback) {
-	console.log ("runScriptText: scriptText == " + scriptText);
 	try {
 		scriptText = preprocessScript (scriptText);
 		console.log ("runScriptText: scriptText == " + scriptText);
