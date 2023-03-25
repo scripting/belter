@@ -1,0 +1,6 @@
+const s3path = "/scripting.com/tmp/belterdemo.txt";
+const filetext = file.readWholeFile ("data/tmp.txt");
+console.log ("s3.newObject == " + s3.newObject (s3path, filetext));
+console.log ("s3.getObject == " + s3.getObject (s3path));
+console.log ("s3.getObjectMetadata == " + json.stringify (s3.getObjectMetadata (s3path)));
+console.log ("s3.deleteObject == " + s3.deleteObject (s3path));

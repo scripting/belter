@@ -1,0 +1,3 @@
+const s3path = "/scripting.com/misc/";
+var theList = s3.listObjects (s3path);
+console.log (json.stringify (theList));

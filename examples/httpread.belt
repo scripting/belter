@@ -1,0 +1,2 @@
+const url = "http://scripting.com/rss.xml";
+console.log ("http.readUrl == " + http.readUrl (url));

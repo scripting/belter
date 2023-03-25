@@ -1,0 +1,17 @@
+{
+	"name": "belterCommandLine",
+	"version": "0.4.0",
+	"main": "cli.js",
+	"bin": {
+		"belt": "cli.js"
+		},
+	"dependencies" : {
+		"daveutils": "*",
+		"daves3": "*",
+		"child_process": "*",
+		"colors": "*",
+		"acorn": "*",
+		"escodegen": "*",
+		"request": "*"
+		}
+	}
