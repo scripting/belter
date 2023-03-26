@@ -10,9 +10,6 @@ const childProcess = require ("child_process");
 const colors = require ("colors");
 const belter = require ("./belter.js"); 
 
-var config = { 
-	myDir: __dirname
-	};
 
 function pad (val, withchar, ctplaces, flleftalign) {
 	var s = (val === undefined) ? "" : val.toString ();
@@ -233,14 +230,7 @@ function fileFromPath (f) {
 	}
 
 function startup () {
-	var myDir = __dirname;
-	readJsonFile (myDir + "/config.json", function (theData) {
-		if (theData !== undefined) {
-			for (var x in theData) {
-				config [x] = theData [x];
-				}
-			}
-		var fldone = false;
+	belter.start (function () {
 		if (process.argv.length <= 2) {
 			helpCommand (); //belt with no params is the help command
 			}

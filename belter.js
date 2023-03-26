@@ -1,11 +1,43 @@
 exports.runScriptText= runScriptText;
+exports.start = start;
 
 const fs = require ("fs");
 const utils = require ("daveutils");
 const daves3 = require ("daves3");
+const filesystem = require ("davefilesystem");
+const opmlPackage = require ("opml");
+const reallysimple = require ("reallySimple");
 const request = require ("request");
 const escodegen = require ("escodegen");
 const acorn = require ("acorn");
+
+var config = {
+	};
+function readConfig (f, config, callback) {
+	fs.readFile (f, function (err, jsontext) {
+		if (!err) {
+			try {
+				var jstruct = JSON.parse (jsontext);
+				for (var x in jstruct) {
+					config [x] = jstruct [x];
+					}
+				}
+			catch (err) {
+				}
+			}
+		callback ();
+		});
+	}
+
+function start (callback) {
+	var myDir = __dirname;
+	readConfig (myDir + "/config.json", config, function () {
+		config.myDir = myDir;
+		callback ();
+		});
+	}
+
+
 
 function runScriptText (scriptText, callback) {
 	if (callback == null) {
@@ -82,8 +114,15 @@ function httpRequest (url, callback) {
 		});
 	}
 
+function fileLooper (folderpath, callback) {
+	filesystem.recursivelyVisitFiles (folderpath, callback);
+	}
+
 const string = {
-	getRandomSnarkySlogan: utils.getRandomSnarkySlogan
+	getRandomSnarkySlogan: utils.getRandomSnarkySlogan,
+	endsWith: utils.endsWith,
+	delete: utils.stringDelete,
+	replaceAll: utils.replaceAll
 	};
 const file = {
 	readWholeFile: function (f) {
@@ -97,7 +136,51 @@ const file = {
 					}
 				});
 			});
+		},
+	writeWholeFile: function (f, filetext) { 
+		return new Promise (function (resolve, reject) {
+			fs.writeFile (f, filetext, function (err, filetext) {
+				if (err) {
+					reject (err);
+					}
+				else {
+					resolve (true); 
+					}
+				});
+			});
+		},
+	loop: function (folder, fileCallback) {
+		return new Promise (function (resolve, reject) {
+			filesystem.recursivelyVisitFiles (folder, fileCallback, function () {
+				resolve (true); 
+				});
+			});
+		},
+	sureFilePath: function (f) {
+		return new Promise (function (resolve, reject) {
+			filesystem.sureFilePath (f, function () {
+				resolve (true); 
+				});
+			});
 		}
+	}
+const opml = {
+	parse: function (opmltext) { //9/13/21 by DW
+		return new Promise (function (resolve, reject) {
+			opmlPackage.parse (opmltext, function (err, theOutline) {
+				if (err) {
+					reject (err);
+					}
+				else {
+					resolve (theOutline); 
+					}
+				});
+			});
+		},
+	stringify: function (theOutline) { //9/13/21 by DW
+		var opmltext = opmlPackage.stringify (theOutline);
+		return (opmltext);
+		},
 	}
 const s3 = {
 	newObject: function (path, data, type="text/plain", acl="public-read", metadata=undefined) {

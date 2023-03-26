@@ -1,0 +1,20 @@
+const sourcefolder = config.user.prefs.githubfolder + "Scripting-News/blog/opml/2023/";
+const destfolder = config.user.prefs.homefolder + "tmp/opmltextfiles/2023/";
+file.loop (sourcefolder, function (f) {
+	console.log ("file.loop: f == " + f);
+	if (string.endsWith (f, ".opml")) {
+		const opmltext = file.readWholeFile (f);
+		const theOutline = opml.parse (opmltext);
+		
+		var relpath = string.delete (f, 1, sourcefolder.length);
+		relpath = string.replaceAll (relpath, ".opml", ".json")
+		
+		const fdest = destfolder + relpath;
+		file.sureFilePath (fdest)
+		
+		var jsontext = json.stringify (theOutline);
+		file.writeWholeFile (fdest, jsontext);
+		
+		console.log (fdest);
+		}
+	});
