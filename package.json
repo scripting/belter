@@ -12,6 +12,7 @@
 		"opml": "*",
 		"reallysimple": "*",
 		"child_process": "*",
+		"require-from-string": "*",
 		"colors": "*",
 		"acorn": "*",
 		"escodegen": "*",

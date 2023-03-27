@@ -1,5 +1,6 @@
-const sourcefolder = config.user.prefs.githubfolder + "Scripting-News/blog/opml/2023/";
-const destfolder = config.user.prefs.homefolder + "tmp/opmltextfiles/2023/";
+const year = 2022;
+const sourcefolder = config.user.prefs.githubfolder + "Scripting-News/blog/opml/" + year + "/";
+const destfolder = config.user.prefs.homefolder + "tmp/opmltextfiles/" + year + "/";
 file.loop (sourcefolder, function (f) {
 	console.log ("file.loop: f == " + f);
 	if (string.endsWith (f, ".opml")) {
