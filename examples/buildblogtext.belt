@@ -1,6 +1,7 @@
 const year = 2022;
-const sourcefolder = config.user.prefs.githubfolder + "Scripting-News/blog/opml/" + year + "/";
-const destfolder = config.user.prefs.homefolder + "tmp/opmltextfiles/" + year + "/";
+const sourcefolder = config.user.prefs.githubfolder + "Scripting-News/blog/opmlOtherSources/";
+const destfolder = config.user.prefs.homefolder + "tmp/opmltextfiles3/";
+
 file.loop (sourcefolder, function (f) {
 	console.log ("file.loop: f == " + f);
 	if (string.endsWith (f, ".opml")) {
@@ -8,13 +9,13 @@ file.loop (sourcefolder, function (f) {
 		const theOutline = opml.parse (opmltext);
 		
 		var relpath = string.delete (f, 1, sourcefolder.length);
-		relpath = string.replaceAll (relpath, ".opml", ".json")
+		relpath = string.replaceAll (relpath, ".opml", ".md")
 		
 		const fdest = destfolder + relpath;
 		file.sureFilePath (fdest)
 		
-		var jsontext = json.stringify (theOutline);
-		file.writeWholeFile (fdest, jsontext);
+		var markdowntext = opml.outlineToMarkdown (theOutline);
+		file.writeWholeFile (fdest, markdowntext);
 		
 		console.log (fdest);
 		}

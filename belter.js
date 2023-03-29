@@ -19,90 +19,13 @@ var config = {
 var plugins = {
 	};
 
-function runScriptText (scriptText, callback) {
-	if (callback == null) {
-		callback = function () {};
-		}
-	function visitCodeTree (theTree, visit) {
-		var stack = new Array ();
-		function doVisit (node) { //depth-first traversal
-			for (var x in node) {
-				if (typeof node [x] == "object") {
-					stack.push (node);
-					doVisit (node [x], visit);
-					stack.pop ();
-					}
-				}
-			if (node != null) {
-				visit (node, stack);
-				}
-			}
-		doVisit (theTree);
-		}
-	function fixSpecialFunctionCalls (theTree) {
-		visitCodeTree (theTree, function (node, stack) {
-			if (node.type == "FunctionDeclaration" || node.type == 'FunctionExpression') {
-				node.async = true;
-				}
-			if (node.type == "CallExpression" && node.callee !== undefined) {
-				var nodecopy = Object.assign(new Object (), node);
-				for (var x in node) {
-					delete node [x];
-					}
-				node.type = "AwaitExpression";
-				node.argument = nodecopy;
-				}
-			return (undefined); // don't replace
-			});
-		}
-	function preprocessScript(scriptText) {
-		var scriptBody = '', tokens, i, info;
-		var code = acorn.parse (scriptText, {ecmaVersion: 2020});
-		fixSpecialFunctionCalls (code);
-		scriptBody = escodegen.generate (code);
-		return "(async function () {" + scriptBody + "})()";
-		}
-	(async function () {
-		var processedScriptText = preprocessScript (scriptText);
-		var scriptVal = eval (processedScriptText);
-		return (scriptVal);
-		})()
-		.then(function (response) {
-			callback(null, response);
-			})
-		.catch(function (error) {
-			callback(error);
-			});
-	}
-
-
-function httpRequest (url, callback) {
-	request (url, function (err, response, data) {
-		if (err) {
-			callback (err);
-			}
-		else {
-			var code = response.statusCode;
-			if ((code < 200) || (code > 299)) {
-				const message = "The request returned a status code of " + response.statusCode + ".";
-				callback ({message});
-				}
-			else {
-				callback (undefined, data) 
-				}
-			}
-		});
-	}
-function fileLooper (folderpath, callback) {
-	filesystem.recursivelyVisitFiles (folderpath, callback);
-	}
-
 const string = {
 	getRandomSnarkySlogan: utils.getRandomSnarkySlogan,
 	endsWith: utils.endsWith,
 	delete: utils.stringDelete,
 	replaceAll: utils.replaceAll,
-	nthField: utils.stringNthField
+	nthField: utils.stringNthField,
+	filledString: utils.filledString
 	};
 const file = {
 	readWholeFile: function (f) {
@@ -161,6 +84,25 @@ const opml = {
 		var opmltext = opmlPackage.stringify (theOutline);
 		return (opmltext);
 		},
+	outlineToMarkdown: function (theOutline) {
+		var markdowntext = ""; indentlevel = 0;
+		function addNode (theNode) {
+			markdowntext += string.filledString ("\t", indentlevel) + "- " + theNode.text + "\n";
+			}
+		function addSubsList (theList) {
+			if (theList !== undefined) {
+				theList.forEach (function (theNode) {
+					addNode (theNode);
+					indentlevel++;
+					addSubsList (theNode.subs);
+					indentlevel--;
+					});
+				}
+			}
+		debugger;
+		addSubsList (theOutline.opml.body.subs);
+		return (markdowntext);
+		}
 	}
 const s3 = {
 	newObject: function (path, data, type="text/plain", acl="public-read", metadata=undefined) {
@@ -245,6 +187,84 @@ const http = {
 		},
 	}
 
+function runScriptText (scriptText, callback) {
+	if (callback == null) {
+		callback = function () {};
+		}
+	function visitCodeTree (theTree, visit) {
+		var stack = new Array ();
+		function doVisit (node) { //depth-first traversal
+			for (var x in node) {
+				if (typeof node [x] == "object") {
+					stack.push (node);
+					doVisit (node [x], visit);
+					stack.pop ();
+					}
+				}
+			if (node != null) {
+				visit (node, stack);
+				}
+			}
+		doVisit (theTree);
+		}
+	function fixSpecialFunctionCalls (theTree) {
+		visitCodeTree (theTree, function (node, stack) {
+			if (node.type == "FunctionDeclaration" || node.type == 'FunctionExpression') {
+				node.async = true;
+				}
+			if (node.type == "CallExpression" && node.callee !== undefined) {
+				var nodecopy = Object.assign(new Object (), node);
+				for (var x in node) {
+					delete node [x];
+					}
+				node.type = "AwaitExpression";
+				node.argument = nodecopy;
+				}
+			return (undefined); // don't replace
+			});
+		}
+	function preprocessScript(scriptText) {
+		var scriptBody = '', tokens, i, info;
+		var code = acorn.parse (scriptText, {ecmaVersion: 2020});
+		fixSpecialFunctionCalls (code);
+		scriptBody = escodegen.generate (code);
+		return "(async function () {" + scriptBody + "})()";
+		}
+	(async function () {
+		var processedScriptText = preprocessScript (scriptText);
+		var scriptVal = eval (processedScriptText);
+		return (scriptVal);
+		})()
+		.then(function (response) {
+			callback(null, response);
+			})
+		.catch(function (error) {
+			callback(error);
+			});
+	}
+
+
+function httpRequest (url, callback) {
+	request (url, function (err, response, data) {
+		if (err) {
+			callback (err);
+			}
+		else {
+			var code = response.statusCode;
+			if ((code < 200) || (code > 299)) {
+				const message = "The request returned a status code of " + response.statusCode + ".";
+				callback ({message});
+				}
+			else {
+				callback (undefined, data) 
+				}
+			}
+		});
+	}
+function fileLooper (folderpath, callback) {
+	filesystem.recursivelyVisitFiles (folderpath, callback);
+	}
+
 function readConfig (f, config, callback) {
 	fs.readFile (f, function (err, jsontext) {
 		if (!err) {
@@ -284,7 +304,6 @@ function loadPlugins (callback) {
 				callback (err); 
 				}
 			else {
-				debugger;
 				theListOfFiles.forEach (function (fname) {
 					loadPlugin (fname);
 					});
