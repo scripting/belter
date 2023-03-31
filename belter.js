@@ -11,6 +11,7 @@ const requireFromString = require ("require-from-string");
 const request = require ("request");
 const escodegen = require ("escodegen");
 const acorn = require ("acorn");
+const childProcess = require ("child_process");
 
 var config = {
 	myDir: __dirname,
@@ -185,6 +186,34 @@ const http = {
 				})
 			});
 		},
+	}
+const rss = {
+	readFeed: function (urlfeed) {
+		return new Promise (function (resolve, reject) {
+			reallysimple.readFeed (urlfeed, function (err, theFeed) {
+				if (err) {
+					reject (err);
+					}
+				else {
+					resolve (theFeed); 
+					}
+				});
+			});
+		}
+	}
+const belter = {
+	runUnixCommand: function (theCommand) {
+		return new Promise (function (resolve, reject) {
+			childProcess.exec (theCommand, function (err, stdout, stderr) {
+				if (err) {
+					reject (stderr);
+					}
+				else {
+					resolve (stdout); 
+					}
+				});
+			});
+		}
 	}
 
 function runScriptText (scriptText, callback) {

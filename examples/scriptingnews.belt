@@ -1,0 +1,1 @@
+belter.runUnixCommand ("open http://scripting.com/");
