@@ -1,3 +1,8 @@
+# buildblogtext example
+
+A Belter script that processes several folders of OPML files containing the source of Scripting News going back to 1994, converting them into a Markdown format that ChatGPT can ingest into one of its databases. 
+
+```JAVASCRIPT
 const sourcefolder = config.user.prefs.githubfolder + "Scripting-News/blog/opml/";
 const destfolder = config.user.prefs.homefolder + "tmp/scriptingInMarkdown/";
 
@@ -18,3 +23,6 @@ file.loop (sourcefolder, function (f) {
 		console.log (fdest);
 		}
 	});
+
+```
+

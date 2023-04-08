@@ -1,1 +1,1 @@
-belter.runUnixCommand ("open http://scripting.com/");
+sys.runUnixCommand ("open http://scripting.com/");

@@ -1,4 +1,4 @@
-exports.runScriptText= runScriptText;
+exports.runScriptText= runScriptText; 
 exports.start = start;
 
 const fs = require ("fs");
@@ -201,7 +201,7 @@ const rss = {
 			});
 		}
 	}
-const belter = {
+const sys = {
 	runUnixCommand: function (theCommand) {
 		return new Promise (function (resolve, reject) {
 			childProcess.exec (theCommand, function (err, stdout, stderr) {
@@ -315,7 +315,6 @@ function loadPlugins (callback) {
 	function loadPlugin (fname) {
 		if (string.endsWith (fname, ".js")) {
 			const f = folder + fname;
-			console.log ("loadPlugin: " + f);
 			const name = string.nthField (fname, ".", 1);
 			fs.readFile (f, function (err, filetext) {
 				if (err) {

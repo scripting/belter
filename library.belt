@@ -1,0 +1,14 @@
+function readNytFeed (urlFeed) {
+	console.log ("readNytFeed: urlFeed == " + urlFeed);
+	const urlmarkdownfeed = "http://feeder.scripting.com/returnmarkdown?feedurl=" + urlFeed;
+	const mdtext = http.readUrl (urlmarkdownfeed);
+	return (mdtext);
+	}
+function writeNytFeed (fname, mdtext) {
+	const f = config.user.prefs.publicfolder + "chatgpt/nytBotSource/" + fname;
+	file.writeWholeFile (f, mdtext)
+	}
+function doNytFeed (urlFeed, fname) {
+	var mdtext = readNytFeed (urlFeed);
+	writeNytFeed (fname, mdtext);
+	}

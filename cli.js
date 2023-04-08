@@ -10,6 +10,56 @@ const childProcess = require ("child_process");
 const colors = require ("colors");
 const belter = require ("./belter.js"); 
 
+
+
+function processIncludes (sourcetext) { //4/7/23 by DW
+	function getnextline () {
+		const ix = sourcetext.indexOf ("\n");
+		if (ix == -1) {
+			let theLine = sourcetext;
+			sourcetext = "";
+			return (theLine);
+			}
+		else {
+			let theLine = utils.stringMid (sourcetext, 1, ix);
+			sourcetext = utils.stringDelete (sourcetext, 1, theLine.length + 1);
+			return (theLine);
+			}
+		}
+	var processedtext = "";
+	sourcetext = sourcetext.toString ();
+	while (sourcetext.length > 0) {
+		let theLine = getnextline ();
+		if (utils.beginsWith (theLine, "#")) {
+			
+			var flValidFile = false;
+			var theDirective = utils.stringDelete (utils.stringNthField (theLine, " ", 1), 1, 1);
+			var theFile = utils.trimWhitespace (utils.stringNthField (theLine, " ", 2));
+			if (utils.beginsWith (theFile, "\"")) {
+				if (utils.endsWith (theFile, "\"")) {
+					theFile = utils.stringMid (theFile, 2, theFile.length - 2);
+					flValidFile = true;
+					}
+				}
+			
+			if (flValidFile) {
+				try {
+					theLine = fs.readFileSync (theFile).toString ();
+					}
+				catch (err) {
+					theLine = "//" + err.message;
+					}
+				}
+			else {
+				theLine = "//" + theLine;
+				}
+			}
+		console.log (theLine);
+		processedtext += theLine + "\n";
+		}
+	return (processedtext);
+	}
+
 function pad (val, withchar, ctplaces, flleftalign) {
 	var s = (val === undefined) ? "" : val.toString ();
 	while (s.length < ctplaces) {
@@ -71,7 +121,8 @@ function startup () {
 					}
 				else {
 					console.log ("");
-					belter.runScriptText (filetext.toString (), function (err, data) {
+					filetext = processIncludes (filetext)
+					belter.runScriptText (filetext, function (err, data) {
 						if (err) {
 							console.log (err.message + "\n");
 							}
