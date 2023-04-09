@@ -1,5 +1,20 @@
 #include "library.belt"
 
+function readNytFeed (urlFeed) {
+	console.log ("readNytFeed: urlFeed == " + urlFeed);
+	const urlmarkdownfeed = "http://feeder.scripting.com/returnmarkdown?feedurl=" + urlFeed;
+	const mdtext = http.readUrl (urlmarkdownfeed);
+	return (mdtext);
+	}
+function writeNytFeed (fname, mdtext) {
+	const f = config.user.prefs.publicfolder + "chatgpt/nytBotSource/" + fname;
+	file.writeWholeFile (f, mdtext)
+	}
+function doNytFeed (urlFeed, fname) {
+	var mdtext = readNytFeed (urlFeed);
+	writeNytFeed (fname, mdtext);
+	}
+
 doNytFeed ("https://rss.nytimes.com/services/xml/rss/nyt/PersonalTech.xml", "personalTechnology.md");
 doNytFeed ("http://rss.nytimes.com/services/xml/rss/nyt/ProBasketball.xml", "proBasketball.md");
 doNytFeed ("http://nytimes.com/timeswire/feeds/", "mostRecentHeadlines.md");

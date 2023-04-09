@@ -10,9 +10,7 @@ const childProcess = require ("child_process");
 const colors = require ("colors");
 const belter = require ("./belter.js"); 
 
-
-
-function processIncludes (sourcetext) { //4/7/23 by DW
+function processDirectives (sourcetext) { //4/7/23 by DW
 	function getnextline () {
 		const ix = sourcetext.indexOf ("\n");
 		if (ix == -1) {
@@ -54,7 +52,6 @@ function processIncludes (sourcetext) { //4/7/23 by DW
 				theLine = "//" + theLine;
 				}
 			}
-		console.log (theLine);
 		processedtext += theLine + "\n";
 		}
 	return (processedtext);
@@ -120,8 +117,7 @@ function startup () {
 					console.log (err.message);
 					}
 				else {
-					console.log ("");
-					filetext = processIncludes (filetext)
+					filetext = processDirectives (filetext)
 					belter.runScriptText (filetext, function (err, data) {
 						if (err) {
 							console.log (err.message + "\n");
