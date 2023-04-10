@@ -29,27 +29,28 @@ function processDirectives (sourcetext) { //4/7/23 by DW
 	while (sourcetext.length > 0) {
 		let theLine = getnextline ();
 		if (utils.beginsWith (theLine, "#")) {
-			
-			var flValidFile = false;
 			var theDirective = utils.stringDelete (utils.stringNthField (theLine, " ", 1), 1, 1);
-			var theFile = utils.trimWhitespace (utils.stringNthField (theLine, " ", 2));
-			if (utils.beginsWith (theFile, "\"")) {
-				if (utils.endsWith (theFile, "\"")) {
-					theFile = utils.stringMid (theFile, 2, theFile.length - 2);
-					flValidFile = true;
-					}
-				}
-			
-			if (flValidFile) {
-				try {
-					theLine = fs.readFileSync (theFile).toString ();
-					}
-				catch (err) {
-					theLine = "//" + err.message;
-					}
-				}
-			else {
-				theLine = "//" + theLine;
+			switch (theDirective) {
+				case "include":
+					var theFile = utils.trimWhitespace (utils.stringNthField (theLine, " ", 2)), flValidFile = false;
+					if (utils.beginsWith (theFile, "\"")) {
+						if (utils.endsWith (theFile, "\"")) {
+							theFile = utils.stringMid (theFile, 2, theFile.length - 2);
+							flValidFile = true;
+							}
+						}
+					if (flValidFile) {
+						try {
+							theLine = fs.readFileSync (theFile).toString ();
+							}
+						catch (err) {
+							theLine = "//" + err.message;
+							}
+						}
+					else {
+						theLine = "//" + theLine;
+						}
+					break;
 				}
 			}
 		processedtext += theLine + "\n";
