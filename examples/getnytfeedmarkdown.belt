@@ -18,6 +18,7 @@ function doNytFeed (urlFeed, fname) {
 doNytFeed ("https://rss.nytimes.com/services/xml/rss/nyt/PersonalTech.xml", "personalTechnology.md");
 doNytFeed ("http://rss.nytimes.com/services/xml/rss/nyt/ProBasketball.xml", "proBasketball.md");
 doNytFeed ("http://nytimes.com/timeswire/feeds/", "mostRecentHeadlines.md");
+doNytFeed ("https://rss.nytimes.com/services/xml/rss/nyt/Television.xml", "television.md");
 
 
 
