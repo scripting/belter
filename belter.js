@@ -186,6 +186,63 @@ const http = {
 				})
 			});
 		},
+	post: function (url, body, headers) {
+		return new Promise (function (resolve, reject) {
+			var options = {url: url, method: "POST", body: body, headers: headers};
+			request (options, function (err, response, data) {
+				if (err) {
+					reject (err);
+					}
+				else {
+					var code = response.statusCode;
+					if ((code < 200) || (code > 299)) {
+						const message = "The request returned a status code of " + code + ".";
+						reject ({message});
+						}
+					else {
+						resolve (data.toString ());
+						}
+					}
+				});
+			});
+		},
+	}
+const chatGpt = {
+	ask: function (prompt) {
+		return new Promise (function (resolve, reject) {
+			const url = "https://api.openai.com/v1/chat/completions";
+			const headers = {
+				"Authorization": "Bearer " + config.chatGpt.apikey,
+				"Content-Type": "application/json"
+				};
+			const payload = {
+				model: config.chatGpt.model,
+				messages: [
+					{role: "user", content: prompt}
+					]
+				};
+			http.post (url, JSON.stringify (payload), headers)
+				.then (function (responsetext) {
+					var jstruct;
+					try {
+						jstruct = JSON.parse (responsetext);
+						}
+					catch (err) {
+						reject (err);
+						return;
+						}
+					if ((jstruct.choices === undefined) || (jstruct.choices.length === 0)) {
+						reject ({message: "ChatGPT returned no choices."});
+						}
+					else {
+						resolve (jstruct.choices [0].message.content);
+						}
+					})
+				.catch (function (err) {
+					reject (err);
+					});
+			});
+		}
 	}
 const rss = {
 	readFeed: function (urlfeed) {
@@ -216,7 +273,14 @@ const sys = {
 		}
 	}
 
-function runScriptText (scriptText, callback) {
+function runScriptText (scriptText, args, callback) {
+	if (typeof args === "function") { //old two-arg call -- shift args into callback
+		callback = args;
+		args = [];
+		}
+	if (args == null) {
+		args = [];
+		}
 	if (callback == null) {
 		callback = function () {};
 		}
@@ -237,19 +301,43 @@ function runScriptText (scriptText, callback) {
 		doVisit (theTree);
 		}
 	function fixSpecialFunctionCalls (theTree) {
-		visitCodeTree (theTree, function (node, stack) {
-			if (node.type == "FunctionDeclaration" || node.type == 'FunctionExpression') {
-				node.async = true;
-				}
-			if (node.type == "CallExpression" && node.callee !== undefined) {
-				var nodecopy = Object.assign(new Object (), node);
-				for (var x in node) {
-					delete node [x];
+		function isFunctionNode (node) {
+			return ((node.type === "FunctionDeclaration") || (node.type === "FunctionExpression") || (node.type === "ArrowFunctionExpression"));
+			}
+		function isArgumentCallback (stack) { //is the visited function literal passed as a call argument?
+			var theParent = stack [stack.length - 1];
+			var theGrandparent = stack [stack.length - 2];
+			return ((theGrandparent !== undefined) && (theGrandparent.type === "CallExpression") && (theGrandparent.arguments === theParent));
+			}
+		function isInsideArgumentCallback (stack) { //is the visited node lexically inside such a callback?
+			for (var i = 0; i < stack.length; i++) {
+				if (isFunctionNode (stack [i])) {
+					var theParent = stack [i - 1];
+					var theGrandparent = stack [i - 2];
+					if ((theGrandparent !== undefined) && (theGrandparent.type === "CallExpression") && (theGrandparent.arguments === theParent)) {
+						return (true);
+						}
 					}
-				node.type = "AwaitExpression";
-				node.argument = nodecopy;
 				}
-			return (undefined); // don't replace
+			return (false);
+			}
+		visitCodeTree (theTree, function (node, stack) {
+			if (isFunctionNode (node)) {
+				if (!isArgumentCallback (stack) && !isInsideArgumentCallback (stack)) {
+					node.async = true;
+					}
+				}
+			if ((node.type === "CallExpression") && (node.callee !== undefined)) {
+				if (!isInsideArgumentCallback (stack)) {
+					var nodecopy = Object.assign (new Object (), node);
+					for (var x in node) {
+						delete node [x];
+						}
+					node.type = "AwaitExpression";
+					node.argument = nodecopy;
+					}
+				}
+			return (undefined); //don't replace
 			});
 		}
 	function preprocessScript(scriptText) {

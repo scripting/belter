@@ -5,17 +5,18 @@
 	"bin": {
 		"belt": "cli.js"
 		},
-	"dependencies" : {
-		"daveutils": "*",
-		"daves3": "*",
+	"dependencies": {
+		"acorn": "*",
+		"child_process": "*",
+		"colors": "*",
 		"davefilesystem": "*",
+		"daverss": "^0.6.17",
+		"daves3": "*",
+		"daveutils": "^0.4.75",
+		"escodegen": "*",
 		"opml": "*",
 		"reallysimple": "*",
-		"child_process": "*",
-		"require-from-string": "*",
-		"colors": "*",
-		"acorn": "*",
-		"escodegen": "*",
-		"request": "*"
+		"request": "*",
+		"require-from-string": "*"
 		}
 	}

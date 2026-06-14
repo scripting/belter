@@ -113,13 +113,14 @@ function startup () {
 			}
 		else {
 			let beltfile = process.argv [2];
+			let scriptArgs = process.argv.slice (3);
 			fs.readFile (beltfile, function (err, filetext) {
 				if (err) {
 					console.log (err.message);
 					}
 				else {
 					filetext = processDirectives (filetext)
-					belter.runScriptText (filetext, function (err, data) {
+					belter.runScriptText (filetext, scriptArgs, function (err, data) {
 						if (err) {
 							console.log (err.message + "\n");
 							}
