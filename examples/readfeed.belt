@@ -1,0 +1,11 @@
+var theFeed = rss.readFeed ("http://scripting.com/rss.xml");
+for (var i = 0; i < theFeed.items.length; i++) {
+	var item = theFeed.items [i];
+	console.log ("\n### - " + item.pubDate.toUTCString ());
+	if (item.title !== undefined) {
+		console.log ("\n### - " + item.title);
+		}
+	if (item.description !== undefined) {
+		console.log ("\n- " + item.description);
+		}
+	}

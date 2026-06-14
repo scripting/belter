@@ -1,0 +1,69 @@
+//giftarticles -- rebuild a clean rss 2.0 feed from the @GiftArticles feed.
+//the source feed is broken: every article lives inside the item's description
+//html, and its link/guid just repeat the mastodon toot. so for each item we
+//pull the headline and the real article url out of the description, then emit
+//a well-formed feed (via daverss) that behaves correctly in feedland.
+
+const urlfeed = "https://tomkahe.com/@GiftArticles.rss";
+
+const theFeed = rss.readFeed (urlfeed);
+
+var feedItems = new Array ();
+
+theFeed.items.forEach (function (item) {
+	const description = item.description;
+
+	//the headline is the text before the anchor; strip the html tags.
+	var headline = description;
+	const ixAnchor = headline.indexOf ("<a ");
+	if (ixAnchor !== -1) {
+		headline = headline.substring (0, ixAnchor);
+		}
+	headline = headline.replace (/<[^>]+>/g, "").trim ();
+
+	//the real article url is the anchor's href, not item.link (a repeat).
+	var url = item.link;
+	const ixHref = description.indexOf ("href=\"");
+	if (ixHref !== -1) {
+		const rest = description.substring (ixHref + 6);
+		url = rest.substring (0, rest.indexOf ("\""));
+		}
+
+	//both came out of html, so decode their entities to real text -- daverss
+	//re-encodes once on the way into the xml, so decoding now avoids double-encoding.
+	headline = string.decodeXml (headline);
+	url = string.decodeXml (url);
+
+	//skip items with no headline (e.g. a live-blog with no text before the anchor).
+	if (headline.length === 0) {
+		return;
+		}
+
+	feedItems.push ({
+		title: headline,
+		link: url,
+		guid: {flPermalink: true, value: url},
+		when: item.pubDate
+		});
+	});
+
+const headElements = {
+	title: "Gift Articles",
+	link: "https://giftarticles.feedland.org/",
+	description: "Gift articles, rebuilt as a clean feed from the @GiftArticles Mastodon account.",
+	generator: "belter",
+	maxFeedItems: 50
+	};
+
+const xmltext = rss.buildRssFeed (headElements, feedItems);
+
+//local copy.
+const filepath = config.user.prefs.publicfolder + "giftarticles/rss.xml";
+file.sureFilePath (filepath);
+file.writeWholeFile (filepath, xmltext);
+console.log ("Wrote " + filepath);
+
+//s3 copy -- served at the domain so feedland can subscribe to it.
+const s3path = "/scripting/giftarticles/rss.xml";
+s3.newObject (s3path, xmltext, "text/xml", "public-read");
+console.log ("Wrote " + s3path);

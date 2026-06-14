@@ -1,0 +1,5 @@
+#include "library.belt"
+const urltoot = "https://mastodon.social/api/oembed?url=https://mastodon.social/@andypiper/108237453365199182";
+const jsontext = http.readUrl (urltoot);
+const jstruct = JSON.parse (jsontext);
+console.log (json.stringify (jstruct));

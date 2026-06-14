@@ -1,0 +1,34 @@
+//mypedia -- build a short, balanced reference page about a name, using ChatGPT.
+
+const name = args [0];
+if (name === undefined) {
+	console.log ("Usage: belt mypedia.belt \"name\"");
+	}
+else {
+	//first-cut prompt -- refine the wording here.
+	const prompt = "Build a short, balanced reference page about " + name + ". "
+		+ "Follow the structure of a Wikipedia article but keep it brief -- an outline of the basic facts, not a long detailed treatment. "
+		+ "Cover who or what it is, why it matters, and the essential history. "
+		+ "Stay neutral; where there is controversy, note the main sides briefly rather than taking one. "
+		+ "Include links to authoritative web sources so the reader can follow the original work. "
+		+ "Return the page as Markdown, starting with a top-level heading for the name.";
+	const markdown = chatGpt.ask (prompt);
+	const hyphenated = string.replaceAll (name, " ", "-");
+
+	//local copy.
+	const filepath = config.user.prefs.publicfolder + "mypedia/" + hyphenated + ".md";
+	file.sureFilePath (filepath);
+	file.writeWholeFile (filepath, markdown);
+	console.log ("Wrote " + filepath);
+
+	//S3 copy at a calendar-structured, lowercase path, served by PagePark.
+	const now = new Date ();
+	const year = now.getFullYear ();
+	const month = ("0" + (now.getMonth () + 1)).slice (-2);
+	const day = ("0" + now.getDate ()).slice (-2);
+	const datepath = year + "/" + month + "/" + day;
+	const slug = hyphenated.toLowerCase () + ".md";
+	const s3path = "/scripting/mypedia/" + datepath + "/" + slug;
+	s3.newObject (s3path, markdown, "text/markdown", "public-read");
+	console.log ("https://library.scripting.com/" + datepath + "/" + slug);
+	}
