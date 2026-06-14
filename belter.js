@@ -7,6 +7,7 @@ const daves3 = require ("daves3");
 const filesystem = require ("davefilesystem");
 const opmlPackage = require ("opml");
 const reallysimple = require ("reallySimple");
+const daverss = require ("daverss");
 const requireFromString = require ("require-from-string");
 const request = require ("request");
 const escodegen = require ("escodegen");
@@ -26,7 +27,10 @@ const string = {
 	delete: utils.stringDelete,
 	replaceAll: utils.replaceAll,
 	nthField: utils.stringNthField,
-	filledString: utils.filledString
+	filledString: utils.filledString,
+	decodeXml: function (theString) { //flComplete=true so scripts always get the full decode -- named + numeric entities
+		return (utils.decodeXml (theString, true));
+		}
 	};
 const file = {
 	readWholeFile: function (f) {
@@ -252,10 +256,13 @@ const rss = {
 					reject (err);
 					}
 				else {
-					resolve (theFeed); 
+					resolve (theFeed);
 					}
 				});
 			});
+		},
+	buildRssFeed: function (headElements, feedItems) {
+		return (daverss.buildRssFeed (headElements, feedItems));
 		}
 	}
 const sys = {
